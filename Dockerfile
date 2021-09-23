@@ -1,4 +1,4 @@
-# => Build container
+# Build container
 FROM node:alpine as builder
 WORKDIR /app
 COPY package.json .
@@ -7,17 +7,17 @@ RUN npm i
 COPY . .
 RUN npm run build
 
-# => Run container
+# Run container
 FROM nginx:1.21
 
 # Nginx config
 RUN rm -rf /etc/nginx/conf.d
 COPY conf /etc/nginx
 
-# Static build
+# Copy build to nginx folder
 COPY --from=builder /app/build /usr/share/nginx/html/
 
-# Default port exposure
+# Expose ports
 EXPOSE 80 443
 
 # Copy .env file and shell script to container
@@ -28,10 +28,7 @@ COPY .env .
 COPY .cert .cert
 RUN chmod 755 .cert/*
 
-# Add bash
-# RUN apk add --no-cache bash
-
-# Make our shell script executable
+# Make script executable
 RUN chmod +x env.sh
 
 # Start Nginx server
